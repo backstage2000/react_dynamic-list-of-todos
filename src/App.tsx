@@ -8,14 +8,15 @@ import { TodoFilter } from './components/TodoFilter';
 import { TodoModal } from './components/TodoModal';
 import { Loader } from './components/Loader';
 import { fetchPostsFromTodos } from './services/fetchDataFromTodos';
-import { Todo } from './types/Todo';
+import { StatusFilter, Todo } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[] | []>([]);
-  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [error, setError] = useState<string | null>(null);
-
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [updateAt, setUpdateAt] = useState<Date>(new Date());
   const [selectedPosts, setSelectedPosts] = useState<Todo | null>(null);
 
@@ -24,13 +25,25 @@ export const App: React.FC = () => {
     setError(null);
   }
 
+  const visibleTodos = todos.filter(todo => {
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && !todo.completed) ||
+      (statusFilter === 'completed' && todo.completed);
+
+    const matchesSearch = todo.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    return matchesStatus && matchesSearch;
+  });
+
   useEffect(() => {
     setLoadingPosts(true);
 
     fetchPostsFromTodos()
       .then(data => {
         setTodos(data);
-        setFilteredTodos(data);
       })
       .catch(() => setError('Request failed'))
       .finally(() => {
@@ -46,14 +59,19 @@ export const App: React.FC = () => {
             <h1 className="title">Todos:</h1>
 
             <div className="block">
-              <TodoFilter todos={todos} setFilter={setFilteredTodos} />
+              <TodoFilter
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
             </div>
 
             <div className="block">
               {loadingPosts && <Loader />}
               {!loadingPosts && todos.length > 0 && (
                 <TodoList
-                  todos={filteredTodos}
+                  todos={visibleTodos}
                   onSelect={setSelectedPosts}
                   selectedPosts={selectedPosts}
                 />

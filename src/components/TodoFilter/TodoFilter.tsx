@@ -1,59 +1,37 @@
-import { useEffect, useState } from 'react';
-import { Todo } from '../../types/Todo';
+import { StatusFilter } from '../../types/Todo';
 
 type Props = {
-  todos: Todo[] | null;
-
-  setFilter: (todos: Todo[] | []) => void;
+  statusFilter: StatusFilter;
+  setStatusFilter: (value: 'all' | 'active' | 'completed') => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
 };
 
-type FilterPosts = 'all' | 'active' | 'completed';
-
-export const TodoFilter: React.FC<Props> = ({ todos, setFilter }) => {
-  const [selectedStatus, setSelectedStatus] = useState<FilterPosts>('all');
-  const [query, setQuery] = useState('');
-
-  const handleCloseModal = () => {
-    setQuery('');
+export const TodoFilter: React.FC<Props> = ({
+  statusFilter,
+  setStatusFilter,
+  searchQuery,
+  setSearchQuery,
+}) => {
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value as 'all' | 'active' | 'completed');
   };
 
-  useEffect(() => {
-    if (!todos) {
-      setFilter([]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
-      return;
-    }
-
-    let filtered = todos;
-
-    if (selectedStatus === 'completed') {
-      filtered = filtered.filter(todo => todo.completed);
-    }
-
-    if (selectedStatus === 'active') {
-      filtered = filtered.filter(todo => !todo.completed);
-    }
-
-    if (query.trim() !== '') {
-      filtered = filtered.filter(todo =>
-        todo.title.toLowerCase().includes(query.toLowerCase()),
-      );
-    }
-
-    setFilter(filtered);
-  }, [todos, selectedStatus, query, setFilter]);
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
 
   return (
     <form className="field has-addons">
       <p className="control">
         <span className="select">
           <select
-            value={selectedStatus}
-            onChange={e => {
-              const value = e.target.value as FilterPosts;
-
-              setSelectedStatus(value);
-            }}
+            value={statusFilter}
+            onChange={handleStatusChange}
             data-cy="statusSelect"
           >
             <option value="all">All</option>
@@ -67,10 +45,8 @@ export const TodoFilter: React.FC<Props> = ({ todos, setFilter }) => {
         <input
           data-cy="searchInput"
           type="text"
-          value={query}
-          onChange={e => {
-            setQuery(e.target.value);
-          }}
+          value={searchQuery}
+          onChange={handleSearchChange}
           className="input"
           placeholder="Search..."
         />
@@ -78,14 +54,14 @@ export const TodoFilter: React.FC<Props> = ({ todos, setFilter }) => {
           <i className="fas fa-magnifying-glass" />
         </span>
 
-        {query && (
+        {searchQuery && (
           <span className="icon is-right" style={{ pointerEvents: 'all' }}>
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <button
               data-cy="clearSearchButton"
               type="button"
               className="delete"
-              onClick={handleCloseModal}
+              onClick={handleClearSearch}
             />
           </span>
         )}
