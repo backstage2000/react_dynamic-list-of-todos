@@ -15,7 +15,6 @@ export const App: React.FC = () => {
   const [posts, setPosts] = useState<Todo[] | null>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [updateAt, setUpdateAt] = useState<Date>(new Date());
   const [selectedPosts, setSelectedPosts] = useState<Todo | null>(null);
@@ -28,8 +27,6 @@ export const App: React.FC = () => {
   useEffect(() => {
     setLoadingPosts(true);
 
-    let timerID: ReturnType<typeof setTimeout>;
-
     fetchPostsFromTodos()
       .then(data => {
         setAllPosts(data);
@@ -37,10 +34,8 @@ export const App: React.FC = () => {
       })
       .catch(() => setError('Request failed'))
       .finally(() => {
-        timerID = setTimeout(() => setLoadingPosts(false), 300);
+        setLoadingPosts(false);
       });
-
-    return () => clearTimeout(timerID);
   }, [updateAt]);
 
   return (
