@@ -11,8 +11,8 @@ import { fetchPostsFromTodos } from './services/fetchDataFromTodos';
 import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
-  const [allPosts, setAllPosts] = useState<Todo[]>([]);
-  const [posts, setPosts] = useState<Todo[] | null>([]);
+  const [todos, setTodos] = useState<Todo[] | []>([]);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -29,8 +29,8 @@ export const App: React.FC = () => {
 
     fetchPostsFromTodos()
       .then(data => {
-        setAllPosts(data);
-        setPosts(data);
+        setTodos(data);
+        setFilteredTodos(data);
       })
       .catch(() => setError('Request failed'))
       .finally(() => {
@@ -46,22 +46,19 @@ export const App: React.FC = () => {
             <h1 className="title">Todos:</h1>
 
             <div className="block">
-              <TodoFilter
-                todos={allPosts}
-                setFilter={todos => setPosts(todos)}
-              />
+              <TodoFilter todos={todos} setFilter={setFilteredTodos} />
             </div>
 
             <div className="block">
               {loadingPosts && <Loader />}
-              {!loadingPosts && allPosts.length > 0 && (
+              {!loadingPosts && todos.length > 0 && (
                 <TodoList
-                  todos={posts}
+                  todos={filteredTodos}
                   onSelect={setSelectedPosts}
                   selectedPosts={selectedPosts}
                 />
               )}
-              {!loadingPosts && !error && allPosts.length === 0 && (
+              {!loadingPosts && !error && todos.length === 0 && (
                 <p className="title is-5">There are no users</p>
               )}
               {error && (

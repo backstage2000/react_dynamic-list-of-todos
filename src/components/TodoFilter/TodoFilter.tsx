@@ -4,7 +4,7 @@ import { Todo } from '../../types/Todo';
 type Props = {
   todos: Todo[] | null;
 
-  setFilter: (todos: Todo[] | null) => void;
+  setFilter: (todos: Todo[] | []) => void;
 };
 
 type FilterPosts = 'all' | 'active' | 'completed';
@@ -19,7 +19,7 @@ export const TodoFilter: React.FC<Props> = ({ todos, setFilter }) => {
 
   useEffect(() => {
     if (!todos) {
-      setFilter(null);
+      setFilter([]);
 
       return;
     }
